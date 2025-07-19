@@ -1,12 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, Sector } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import './App.css'; // Import the stylesheet
 
 // --- Data ---
-// Source: Fall 2024 full-time and part-time fall enrolment at Canadian universities
-// As provided in the assignment document.
 const universityData = [
   { name: 'Algoma University', ftUndergrad: 5700, ftGrad: 70, ptUndergrad: 480 },
-  { name: 'Brescia University College', ftUndergrad: 1500, ftGrad: 0, ptUndergrad: 100 }, // Fictional data for Brescia for demo
+  { name: 'Brescia University College', ftUndergrad: 1500, ftGrad: 0, ptUndergrad: 100 },
   { name: 'Brock University', ftUndergrad: 15600, ftGrad: 1800, ptUndergrad: 1700 },
   { name: 'Carleton University', ftUndergrad: 19600, ftGrad: 3900, ptUndergrad: 5500 },
 ];
@@ -24,6 +23,7 @@ const translations = {
     university: 'University',
     enrolment: 'Enrolment',
     languageToggle: 'Français',
+    barChartSubtitle: 'Click a bar to see details',
   },
   fr: {
     dashboardTitle: 'Tableau de Bord des Inscriptions Universitaires Canadiennes',
@@ -36,6 +36,7 @@ const translations = {
     university: 'Université',
     enrolment: 'Inscriptions',
     languageToggle: 'English',
+    barChartSubtitle: 'Cliquez sur une barre pour voir les détails',
   }
 };
 
@@ -44,9 +45,8 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
 const formatNumber = (num) => num.toLocaleString('en-US');
 
 // --- Reusable UI Components ---
-
 const Card = ({ children, className = '' }) => (
-  <div className={`bg-white rounded-xl shadow-md p-6 ${className}`}>
+  <div className={`card ${className}`}>
     {children}
   </div>
 );
@@ -54,21 +54,19 @@ const Card = ({ children, className = '' }) => (
 const LanguageToggleButton = ({ language, setLanguage, t }) => (
     <button
         onClick={() => setLanguage(language === 'en' ? 'fr' : 'en')}
-        className="bg-white text-blue-600 font-semibold py-2 px-4 border border-blue-500 rounded-lg shadow-sm hover:bg-blue-50 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        className="language-toggle-button"
     >
         {t.languageToggle}
     </button>
 );
 
-
 // --- Chart Components ---
-
 const CustomTooltip = ({ active, payload, label, t }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-sm">
-        <p className="font-bold text-gray-800">{label}</p>
-        <p className="text-blue-600">{`${t.enrolment}: ${formatNumber(payload[0].value)}`}</p>
+      <div className="custom-tooltip">
+        <p className="tooltip-label">{label}</p>
+        <p className="tooltip-value">{`${t.enrolment}: ${formatNumber(payload[0].value)}`}</p>
       </div>
     );
   }
@@ -80,8 +78,8 @@ const UniversityBarChart = ({ data, onBarClick, selectedUniversity, t }) => {
 
     return (
         <Card>
-            <h2 className="text-xl font-bold text-gray-800 mb-1">{t.barChartTitle}</h2>
-            <p className="text-sm text-gray-500 mb-4">Click a bar to see details</p>
+            <h2 className="chart-title">{t.barChartTitle}</h2>
+            <p className="chart-subtitle">{t.barChartSubtitle}</p>
             <div style={{ width: '100%', height: 300 }}>
                 <ResponsiveContainer>
                     <BarChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
@@ -90,7 +88,7 @@ const UniversityBarChart = ({ data, onBarClick, selectedUniversity, t }) => {
                         <Tooltip content={<CustomTooltip t={t} />} cursor={{ fill: 'rgba(239, 246, 255, 0.5)' }} />
                         <Bar dataKey={t.ftUndergrad} onClick={onBarClick} radius={[4, 4, 0, 0]}>
                             {chartData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.name === selectedUniversity ? '#2563eb' : '#60a5fa'} />
+                                <Cell key={`cell-${index}`} className={entry.name === selectedUniversity ? 'bar-active' : 'bar-inactive'} />
                             ))}
                         </Bar>
                     </BarChart>
@@ -110,16 +108,14 @@ const EnrolmentDoughnutChart = ({ university, t }) => {
         ].filter(d => d.value > 0);
     }, [university, t]);
 
-    const total = useMemo(() => data.reduce((sum, entry) => sum + entry.value, 0), [data]);
-
-    const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
+    const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
         const RADIAN = Math.PI / 180;
         const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
         const x = cx + radius * Math.cos(-midAngle * RADIAN);
         const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
         return (
-            <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" className="font-semibold text-sm">
+            <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" className="doughnut-label">
                 {`${(percent * 100).toFixed(0)}%`}
             </text>
         );
@@ -129,7 +125,7 @@ const EnrolmentDoughnutChart = ({ university, t }) => {
 
     return (
         <Card>
-            <h2 className="text-xl font-bold text-gray-800 mb-4 truncate">{t.doughnutChartTitle} {university.name}</h2>
+            <h2 className="chart-title truncate">{t.doughnutChartTitle} {university.name}</h2>
              <div style={{ width: '100%', height: 300 }}>
                 <ResponsiveContainer>
                     <PieChart>
@@ -158,9 +154,7 @@ const EnrolmentDoughnutChart = ({ university, t }) => {
     );
 };
 
-
 // --- Main App Component ---
-
 export default function App() {
   const [language, setLanguage] = useState('en');
   const [selectedUniversity, setSelectedUniversity] = useState(universityData[0].name);
@@ -176,43 +170,34 @@ export default function App() {
   }, [selectedUniversity]);
 
   return (
-    <div className="bg-gray-50 min-h-screen font-sans text-gray-900">
-      <div className="container mx-auto p-4 sm:p-6 md:p-8">
-        
-        {/* Header */}
-        <header className="mb-8 flex justify-between items-center">
+    <div className="dashboard-container">
+      <div className="container">
+        <header className="header">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-blue-700">{t.dashboardTitle}</h1>
-            <p className="text-sm text-gray-500 mt-1 max-w-2xl">{t.dashboardSubtitle}</p>
+            <h1 className="header-title">{t.dashboardTitle}</h1>
+            <p className="header-subtitle">{t.dashboardSubtitle}</p>
           </div>
           <LanguageToggleButton language={language} setLanguage={setLanguage} t={t} />
         </header>
 
-        {/* Main Content Grid */}
-        <main className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          
-          {/* Bar Chart Section */}
-          <div className="lg:col-span-3">
-            <UniversityBarChart 
-                data={universityData} 
+        <main className="main-grid">
+          <div className="bar-chart-section">
+            <UniversityBarChart
+                data={universityData}
                 onBarClick={handleBarClick}
                 selectedUniversity={selectedUniversity}
                 t={t}
             />
           </div>
-
-          {/* Doughnut Chart Section */}
-          <div className="lg:col-span-2">
-            <EnrolmentDoughnutChart 
+          <div className="doughnut-chart-section">
+            <EnrolmentDoughnutChart
                 university={selectedUniversityData}
                 t={t}
             />
           </div>
-
         </main>
-        
-        {/* Footer */}
-        <footer className="text-center mt-12 text-gray-400 text-sm">
+
+        <footer className="footer">
             <p>SEG3125 - Assignment 5 - Interactive Dashboard</p>
         </footer>
       </div>
