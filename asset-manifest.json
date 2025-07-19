@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/SEG3125_A5_Bilingual-Interactive-Dashboard/static/css/main.e6c13ad2.css",
+    "main.js": "/SEG3125_A5_Bilingual-Interactive-Dashboard/static/js/main.766768dc.js",
+    "static/js/453.0960c32b.chunk.js": "/SEG3125_A5_Bilingual-Interactive-Dashboard/static/js/453.0960c32b.chunk.js",
+    "index.html": "/SEG3125_A5_Bilingual-Interactive-Dashboard/index.html",
+    "main.e6c13ad2.css.map": "/SEG3125_A5_Bilingual-Interactive-Dashboard/static/css/main.e6c13ad2.css.map",
+    "main.766768dc.js.map": "/SEG3125_A5_Bilingual-Interactive-Dashboard/static/js/main.766768dc.js.map",
+    "453.0960c32b.chunk.js.map": "/SEG3125_A5_Bilingual-Interactive-Dashboard/static/js/453.0960c32b.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.e6c13ad2.css",
+    "static/js/main.766768dc.js"
+  ]
+}
